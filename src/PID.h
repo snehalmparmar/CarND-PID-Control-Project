@@ -1,37 +1,61 @@
 #ifndef PID_H
 #define PID_H
 
-class PID {
- public:
-  /**
-   * Constructor
-   */
+#include <iostream>
+#include "twiddler.h"
+
+
+class PID{
+public:
+  /*
+  * Errors
+  */
+  int it;
+  double params[3];
+  Twiddler twiddler;
+  int sliding_window_size;
+  double twiddle_tolerance;
+  double cte_sliding_window[1000];
+  /*
+  * CTE memory
+  */
+  double cte; 
+  double int_cte;
+  /*
+  * initialization
+  */
+  bool is_initialized;
+  /*
+  * Constructor
+  */
   PID();
 
-  /**
-   * Destructor.
-   */
+  /*
+  * Destructor.
+  */
   virtual ~PID();
 
-  /**
-   * Initialize PID.
-   * @param (Kp_, Ki_, Kd_) The initial PID coefficients
-   */
-  void Init(double Kp_, double Ki_, double Kd_);
+  /*
+  * Initialize PID.
+  */
+  void Init(double Kp, double Ki, double Kd);
 
-  /**
-   * Update the PID error variables given cross track error.
-   * @param cte The current cross track error
-   */
+  /*
+  * Update the PID error variables given cross track error.
+  */
   void UpdateError(double cte);
 
-  /**
-   * Calculate the total PID error.
-   * @output The total PID error
-   */
+  /*
+  * Calculate the total PID error.
+  */
   double TotalError();
 
- private:
+/*
+* Calculate the steering angle
+*/
+  double GetSteering();
+  
+  private:
   /**
    * PID Errors
    */
@@ -47,4 +71,4 @@ class PID {
   double Kd;
 };
 
-#endif  // PID_H
+#endif /* PID_H */
