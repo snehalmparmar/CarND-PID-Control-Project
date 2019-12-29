@@ -1,5 +1,24 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# PID Controller
+
+[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+
+![PIDController_Output](https://github.com/snehalmparmar/CarND-PID-Control-Project/blob/master/src/video_output/2019-12-29-14-21-02_GIF.gif)
+
+The PID uses the cross-track error (CTE) to correct the steering angle. As a result, the vehicle will stay on the road.
+
+The steering angle SA of the vehicle is set by SA = Kp x CTE + Ki x int(CTE x dt) + Kd d(CTE)/dt. 
+
+This is the sum of three terms : proportional, integral and differential. 
+
+**Proportional term.** The goal of the proportional term is to make the vehicle steer towards the line of zero-CTE. The proportional term is the product of cross-track error by a coefficient (Kp). This will tend to reduce the CTE but - if used alone without the integral and differential terms - the vehicle will steer towards the zero CTE line, then when it crosses this line it will have a 0 degrees steering angle (SA = Kp x CTE = 0) but a non-zero yaw angle w.r.t. the path it is trying to follow (the line where CTE = 0), and will cross this line (overshoot). 
+
+**Differential term.** The goal of the differntial term is to make the yaw angle approach zero as the vehicle closes to the center line (where CTE=0).  It is the product of the difference in error between the current CTE and the previous CTE by a coefficient (Kp). If there was an increase in error, we will increase the steering correction. If the error decreased, we will decrease steering correction proportionally to the amount it decreased. This insures the vehicle will converge towards the zero error (the path it is trying to follow) Integral term. 
+
+**Integral term.** The goal of the integral term is to cancel-out a systematic error or bias. It is the product of the cumulative error by a coefficient (Ki). The cumulative error is the sum of the errors for every iteration since the beginning of the simulation. If the yaw rate of the vehicle is non-zero for a desired angle of zero, there is a systematic error (the actual angle of the wheels is different than zero when the sensor reads it is zero, for example). In this case, the vehicle will always drive at an offset if P and D terms are tuned perfectly. By taking the integral of the CTE over time and applying a proportional correction, this systematic error will end up being cancelled. 
+
+The PID requires tuning the Kp, Ki and Kd terms. This tuning was achieved using Twiddle algorithm explained in class. The twiddle algorithm adds a small value to a parameter (Kp, Ki or Kd), than calculates the effect of this tweak on the CTE over the course of a given number of iterations. Depending on the behaviour of the error it will decrease the parameter, reset the change to zero or maintain the change it made. A drawback of this implementation is that the integral error is never reset, therefore the effect of adjusting the Ki coefficient by a given amount is different at each iteration. Ideally, the integral error should be reinitialized between runs of twiddle. 
+
+It can be seen in the following video that with current initial parameters : Kp = 0.1, Ki = 0, Kd = 0.5 the PID already does good. The vehicle oscillates slightly (overshoots), suggesting that the Kd parameter could be higher. The error is reduced by tweaking Kp higher but is not reduced by tweaking neither Ki nor Kd, suggesting that smaller tweaking steps may be required. If let run long enough, the car will run out of the road because the integral error will grow faster than the tweaking steps on Ki are decreasing. To overcome that, it might be necessary to reset the integral error at every twiddle iteration. 
 
 ---
 
@@ -26,7 +45,7 @@ Self-Driving Car Engineer Nanodegree Program
     Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
 * Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
 
-Fellow students have put together a guide to Windows set-up for the project [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/files/Kidnapped_Vehicle_Windows_Setup.pdf) if the environment you have set up for the Sensor Fusion projects does not work for this project. There's also an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3).
+There's an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3)
 
 ## Basic Build Instructions
 
@@ -45,54 +64,3 @@ using the following settings:
 
 * indent using spaces
 * set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
